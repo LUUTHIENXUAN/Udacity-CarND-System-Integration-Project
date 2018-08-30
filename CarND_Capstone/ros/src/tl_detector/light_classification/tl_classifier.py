@@ -17,6 +17,7 @@ class TLClassifier(object):
         self.traffic_light        = TrafficLight.UNKNOWN
         self.condition_check      = False
         self.maybe_download_model = False
+        self.mode                 = "sim"
 
         """
         Pretrained model by TensorFlow
@@ -50,7 +51,11 @@ class TLClassifier(object):
         # TODO: load classifier
         # http://insightsbot.com/blog/womeQ/tensorflow-object-detection-tutorial-on-images
         self.detection_graph = tf.Graph()
-        PATH_TO_CKPT         = self.PATH_TO_MODEL + self.MODEL_NAME + '/frozen_inference_graph.pb'
+
+        if self.mode == "sim":
+            PATH_TO_CKPT = './light_classification/frozen_inference_graph_sim.pb'
+        else:
+            PATH_TO_CKPT = './light_classification/frozen_inference_graph_real.pb'
 
         with self.detection_graph.as_default():
             od_graph_def = tf.GraphDef()
@@ -147,7 +152,7 @@ class TLClassifier(object):
         highest_score = 0.0
 
         for i in range(boxes.shape[0]):
-
+            # choose result with confidence over 60%
             if scores[i] > 0.6 and highest_score < scores[i]:
                 # update traffic light
                 predicted_traffic_light = self.category_index[classes[i]]['name']
@@ -162,5 +167,10 @@ class TLClassifier(object):
 
         elif predicted_traffic_light == "RED":
             self.traffic_light = TrafficLight.RED
+
+        # Visualization of the results of a detection.
+        vis_util.visualize_boxes_and_labels_on_image_array(image, boxes,
+        classes, scores, self.category_index, use_normalized_coordinates=True,
+        line_thickness=8)
 
         return self.traffic_light
