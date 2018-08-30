@@ -2,6 +2,9 @@
 <launch>
     <node pkg="styx" type="server.py" name="styx_server" />
 
-    <!--Launch simulator -->
+    <!--Launch Unity simulator -->
     <node name="unity_simulator" pkg="styx" type="unity_simulator_launcher.sh" output="screen"/>
+    <!--Launch Rivz simulator -->
+    <node pkg="rviz" type="rviz" name="rviz" args="-d $(find styx)/Udacity_default_configs.rviz"/>
+
 </launch>
